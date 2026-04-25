@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: ordering-system-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:root123}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:ordering_system}
+      MYSQL_USER: ${MYSQL_USER:ordering_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:ordering_pass}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - ordering-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ordering-system-app
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      MYSQLHOST: mysql
+      MYSQLPORT: 3306
+      MYSQLDATABASE: ${MYSQL_DATABASE:ordering_system}
+      MYSQLUSER: ${MYSQL_USER:ordering_user}
+      MYSQLPASSWORD: ${MYSQL_PASSWORD:ordering_pass}
+      SERVER_PORT: ${SERVER_PORT:8080}
+      ADMIN_USER: ${ADMIN_USER:admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:admin123}
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - ordering-network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+
+networks:
+  ordering-network:
+    driver: bridge

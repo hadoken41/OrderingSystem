@@ -1,0 +1,11 @@
+[ {
+  "id" : 1,
+  "username" : "christian",
+  "password" : "$2a$10$UbgfkBa48Q4UB70MP8HxwOPUcWaDOoOp74cyiTXR1h3u.gbPV5o0G",
+  "role" : "ADMIN"
+}, {
+  "id" : 2,
+  "username" : "among1",
+  "password" : "$2a$10$xRDvJE3I6aSyw7gOvBtg2OxSw02IglGncRXJyNCCZBraKMaYWvQty",
+  "role" : "USER"
+} ]

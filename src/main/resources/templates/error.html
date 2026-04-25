@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Ordering System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .error-container {
+            text-align: center;
+            max-width: 500px;
+        }
+        .error-code {
+            font-size: 120px;
+            font-weight: 800;
+            color: #3b82f6;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .error-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        .error-message {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        @media (max-width: 480px) {
+            .error-code { font-size: 80px; }
+            .error-title { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-code" th:text="${status}">404</div>
+        <h1 class="error-title" th:text="${error}">Page Not Found</h1>
+        <p class="error-message" th:text="${message}">The page you are looking for does not exist or has been moved.</p>
+        <a href="/" class="btn">Back to Dashboard</a>
+    </div>
+</body>
+</html>
