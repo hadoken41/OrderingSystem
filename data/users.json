@@ -8,4 +8,14 @@
   "username" : "among1",
   "password" : "$2a$10$xRDvJE3I6aSyw7gOvBtg2OxSw02IglGncRXJyNCCZBraKMaYWvQty",
   "role" : "USER"
+}, {
+  "id" : 3,
+  "username" : "iyot",
+  "password" : "$2a$10$PskMvVyp.NPiKrMivfgCQ.PBi5w6Q3vCqA5ybgTOucnY4mtdWZ7Ku",
+  "role" : "USER"
+}, {
+  "id" : 4,
+  "username" : "test",
+  "password" : "$2a$10$OqTnkBhMDoPMoJfp0I2IbeCTcPqDJIoYdFviQZaq0SDwVBtQMEckq",
+  "role" : "USER"
 } ]

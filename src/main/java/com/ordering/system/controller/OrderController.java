@@ -17,11 +17,11 @@ import java.util.List;
 public class OrderController {
 
     private final OrderRepository orderRepository;
-    private final ItemRepository itemRepository;
+    private final ItemRepository  itemRepository;
 
     public OrderController(OrderRepository orderRepository, ItemRepository itemRepository) {
         this.orderRepository = orderRepository;
-        this.itemRepository = itemRepository;
+        this.itemRepository  = itemRepository;
     }
 
     @GetMapping
@@ -37,30 +37,23 @@ public class OrderController {
             orders = orderRepository.findAll();
         }
 
-        double totalRevenue = orders.stream()
-            .filter(o -> o.getStatus().equals("Completed"))
-            .mapToDouble(Order::getTotalPrice).sum();
-        long pendingCount   = orders.stream().filter(o -> o.getStatus().equals("Pending")).count();
-        long completedCount = orders.stream().filter(o -> o.getStatus().equals("Completed")).count();
-        long cancelledCount = orders.stream().filter(o -> o.getStatus().equals("Cancelled")).count();
-
-        model.addAttribute("orders", orders);
-        model.addAttribute("items", itemRepository.findAll());
-        model.addAttribute("search", search);
+        // Stats calculated in DB — no stream filtering
+        model.addAttribute("orders",         orders);
+        model.addAttribute("items",          itemRepository.findAll());
+        model.addAttribute("search",         search);
         model.addAttribute("selectedStatus", status);
-        model.addAttribute("totalRevenue", totalRevenue);
-        model.addAttribute("pendingCount", pendingCount);
-        model.addAttribute("completedCount", completedCount);
-        model.addAttribute("cancelledCount", cancelledCount);
+        model.addAttribute("totalRevenue",   orderRepository.sumCompletedRevenue(
+            LocalDateTime.of(2000,1,1,0,0), LocalDateTime.of(2100,1,1,0,0)));
+        model.addAttribute("pendingCount",   orderRepository.countByStatus("Pending"));
+        model.addAttribute("completedCount", orderRepository.countByStatus("Completed"));
+        model.addAttribute("cancelledCount", orderRepository.countByStatus("Cancelled"));
+
         return "orders";
     }
 
-    // ── Find item by name, no custom repository method needed ──
+    // DB lookup — no more findAll() + stream
     private Item findItemByName(String name) {
-        return itemRepository.findAll().stream()
-            .filter(i -> i.getName().equalsIgnoreCase(name.trim()))
-            .findFirst()
-            .orElse(null);
+        return itemRepository.findByNameIgnoreCase(name.trim()).orElse(null);
     }
 
     @PostMapping("/checkout")
@@ -70,29 +63,23 @@ public class OrderController {
                            @RequestParam List<Double> prices,
                            @RequestParam(required = false) String paymentMethod,
                            RedirectAttributes ra) {
-
         for (int i = 0; i < itemNames.size(); i++) {
-            String itemName   = itemNames.get(i);
-            int    orderedQty = quantities.get(i);
-
-            Item item = findItemByName(itemName);
+            Item item = findItemByName(itemNames.get(i));
             if (item != null) {
-                item.setQuantity(Math.max(item.getQuantity() - orderedQty, 0));
+                item.setQuantity(Math.max(item.getQuantity() - quantities.get(i), 0));
                 item.setUpdatedAt(LocalDateTime.now());
                 itemRepository.save(item);
             }
-
             Order order = new Order();
             order.setCustomerName(customerName);
             order.setPaymentMethod(paymentMethod);
-            order.setItemOrdered(itemName);
-            order.setQuantity(orderedQty);
+            order.setItemOrdered(itemNames.get(i));
+            order.setQuantity(quantities.get(i));
             order.setTotalPrice(prices.get(i));
             order.setStatus("Pending");
             order.setOrderDate(LocalDateTime.now());
             orderRepository.save(order);
         }
-
         ra.addFlashAttribute("success", "Order placed successfully for " + customerName + "!");
         return "redirect:/orders";
     }
@@ -106,12 +93,8 @@ public class OrderController {
                             @RequestParam String status,
                             @RequestParam(required = false) String notes,
                             RedirectAttributes ra) {
-
         Order order = orderRepository.findById(id).orElseThrow();
-        String previousStatus = order.getStatus();
-
-        // ── If Pending → Cancelled: restore the stock ──
-        if ("Pending".equals(previousStatus) && "Cancelled".equals(status)) {
+        if ("Pending".equals(order.getStatus()) && "Cancelled".equals(status)) {
             Item item = findItemByName(order.getItemOrdered());
             if (item != null) {
                 item.setQuantity(item.getQuantity() + order.getQuantity());
@@ -119,7 +102,6 @@ public class OrderController {
                 itemRepository.save(item);
             }
         }
-
         order.setCustomerName(customerName);
         order.setItemOrdered(itemOrdered);
         order.setQuantity(quantity);
@@ -127,36 +109,33 @@ public class OrderController {
         order.setStatus(status);
         order.setNotes(notes);
         orderRepository.save(order);
-
         ra.addFlashAttribute("success", "Order updated successfully!");
         return "redirect:/orders";
     }
 
     @PostMapping("/paid/{id}")
     public String markAsPaid(@PathVariable Long id, RedirectAttributes ra) {
-        Order order = orderRepository.findById(id).orElse(null);
-        if (order != null) {
+        orderRepository.findById(id).ifPresent(order -> {
             order.setStatus("Completed");
             orderRepository.save(order);
-            ra.addFlashAttribute("success", "Order marked as Paid!");
-        }
+        });
+        ra.addFlashAttribute("success", "Order marked as Paid!");
         return "redirect:/orders";
     }
 
     @PostMapping("/delete/{id}")
     public String deleteOrder(@PathVariable Long id, RedirectAttributes ra) {
-        // ── If a Pending order is deleted: restore the stock ──
-        Order order = orderRepository.findById(id).orElse(null);
-        if (order != null && "Pending".equals(order.getStatus())) {
-            Item item = findItemByName(order.getItemOrdered());
-            if (item != null) {
-                item.setQuantity(item.getQuantity() + order.getQuantity());
-                item.setUpdatedAt(LocalDateTime.now());
-                itemRepository.save(item);
+        orderRepository.findById(id).ifPresent(order -> {
+            if ("Pending".equals(order.getStatus())) {
+                Item item = findItemByName(order.getItemOrdered());
+                if (item != null) {
+                    item.setQuantity(item.getQuantity() + order.getQuantity());
+                    item.setUpdatedAt(LocalDateTime.now());
+                    itemRepository.save(item);
+                }
             }
-        }
-
-        orderRepository.deleteById(id);
+            orderRepository.deleteById(id);
+        });
         ra.addFlashAttribute("success", "Order deleted successfully!");
         return "redirect:/orders";
     }

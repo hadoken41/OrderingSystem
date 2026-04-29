@@ -1,11 +1,14 @@
 package com.ordering.system.config;
 
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.crypto.bcrypt.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -18,7 +21,17 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login").permitAll()
+                .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
+
+                // USER and above can access orders
+                .requestMatchers("/orders", "/orders/**").hasAnyRole("USER", "STAFF", "ADMIN")
+
+                // ADMIN only
+                .requestMatchers("/items/**").hasRole("ADMIN")
+                .requestMatchers("/labor/**").hasRole("ADMIN")
+                .requestMatchers("/reports/**").hasRole("ADMIN")
+                .requestMatchers("/users/**").hasRole("ADMIN")
+
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -28,6 +41,11 @@ public class SecurityConfig {
             )
             .logout(logout -> logout
                 .logoutSuccessUrl("/login?logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+            )
+            .exceptionHandling(ex -> ex
+                .accessDeniedPage("/dashboard")
             );
 
         return http.build();

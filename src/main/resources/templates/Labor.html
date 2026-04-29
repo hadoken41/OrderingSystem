@@ -3,323 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Labor Management</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Labor Management — Ordering System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --primary: #3b82f6; --primary-dark: #2563eb; }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            min-height: 100vh; 
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 30%, #f1f5f9 60%, #e2e8f0 100%);
-            padding: 30px 20px; 
-            color: #111827; 
-            position: relative; 
-            overflow-x: hidden; 
+        :root {
+            --sidebar-bg: #111827;
+            --sidebar-w: 224px;
+            --accent: #2563eb;
+            --accent-dark: #1d4ed8;
+            --accent-light: #eff6ff;
+            --bg: #f0f4f8;
+            --surface: #ffffff;
+            --surface2: #f8fafc;
+            --border: #e2e8f0;
+            --text: #111827;
+            --text2: #4b5563;
+            --text3: #9ca3af;
+            --green: #059669; --green-light: #f0fdf4;
+            --amber: #d97706; --amber-light: #fffbeb;
+            --red: #dc2626; --red-light: #fef2f2;
+            --radius: 10px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
         }
-        
-        .bg-pattern {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                radial-gradient(circle at 15% 25%, rgba(59, 130, 246, 0.04) 0%, transparent 35%),
-                radial-gradient(circle at 85% 75%, rgba(168, 85, 247, 0.04) 0%, transparent 35%),
-                radial-gradient(circle at 50% 80%, rgba(34, 197, 94, 0.03) 0%, transparent 40%);
-            z-index: 0;
-            pointer-events: none;
-        }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
 
-        .bg-shapes {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 0;
-            pointer-events: none;
-            overflow: hidden;
-        }
+        /* Sidebar */
+        .sidebar { width: var(--sidebar-w); background: var(--sidebar-bg); display: flex; flex-direction: column; position: fixed; top:0; left:0; height:100vh; z-index:100; }
+        .sidebar-brand { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .brand-mark { display: flex; align-items: center; gap: 10px; }
+        .brand-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        .brand-icon svg { width: 18px; height: 18px; fill: white; }
+        .brand-name { font-size: 15px; font-weight: 700; color: #f9fafb; }
+        .brand-sub { font-size: 11px; color: #6b7280; margin-top: 2px; }
+        .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+        .nav-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #4b5563; padding: 0 8px; margin: 16px 0 6px; }
+        .nav-section-label:first-child { margin-top: 0; }
+        .nav-item { display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 7px; color: #9ca3af; text-decoration: none; font-size: 13.5px; font-weight: 500; transition: background 0.15s, color 0.15s; margin-bottom: 2px; }
+        .nav-item:hover { background: rgba(255,255,255,0.06); color: #e5e7eb; }
+        .nav-item.active { background: rgba(37,99,235,0.18); color: #93c5fd; }
+        .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+        .sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+        .user-info { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.04); margin-bottom: 8px; }
+        .user-avatar { width: 30px; height: 30px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+        .user-name { font-size: 13px; font-weight: 600; color: #e5e7eb; }
+        .user-role { font-size: 11px; color: #6b7280; margin-top: 1px; }
+        .logout-btn { width: 100%; padding: 8px 10px; background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 7px; color: #6b7280; font-size: 12.5px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .logout-btn:hover { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #f87171; }
 
-        .bg-shapes::before {
-            content: '';
-            position: absolute;
-            top: 5%;
-            right: -50px;
-            width: 250px;
-            height: 250px;
-            border: 2px solid rgba(59, 130, 246, 0.04);
-            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-            animation: morph 20s ease-in-out infinite;
-        }
+        /* Main */
+        .main-area { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top:0; z-index:50; box-shadow: var(--shadow); }
+        .topbar-title { font-size: 16px; font-weight: 700; color: var(--text); }
+        .content { padding: 28px 32px; flex: 1; }
 
-        .bg-shapes::after {
-            content: '';
-            position: absolute;
-            bottom: 10%;
-            left: -50px;
-            width: 180px;
-            height: 180px;
-            border: 2px solid rgba(168, 85, 247, 0.03);
-            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-            animation: morph 18s ease-in-out infinite reverse;
-        }
-
-        @keyframes morph {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            25% { transform: translate(15px, -15px) rotate(5deg); }
-            50% { transform: translate(-10px, 10px) rotate(-5deg); }
-            75% { transform: translate(10px, 5px) rotate(3deg); }
-        }
-
-        body::before { content: ''; position: fixed; width: 500px; height: 500px; background: rgba(59, 130, 246, 0.02); border-radius: 50%; top: -150px; left: -150px; pointer-events: none; }
-        body::after { content: ''; position: fixed; width: 400px; height: 400px; background: rgba(59, 130, 246, 0.01); border-radius: 50%; bottom: -120px; right: -120px; pointer-events: none; }
-        .page-wrapper { max-width: 1400px; margin: 0 auto; position: relative; z-index: 1; }
-
-        /* Topbar */
-        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
-        .topbar-left { display: flex; align-items: center; gap: 14px; }
-        .back-btn { color: #6b7280; text-decoration: none; font-size: 0.9rem; font-weight: 600; background: rgba(209, 213, 219, 0.4); border: 1px solid rgba(209, 213, 219, 0.6); padding: 9px 16px; border-radius: 10px; transition: all 0.3s; }
-        .back-btn:hover { background: rgba(209, 213, 219, 0.6); color: #111827; }
-        .page-title { font-size: 2.5rem; color: #111827; font-weight: 700; }
-        .page-subtitle { font-size: 0.85rem; color: #6b7280; font-weight: 400; }
-
-        /* Summary Cards */
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-        .stat-card { background: #ffffff; backdrop-filter: blur(20px); border: 1px solid rgba(209, 213, 219, 0.6); border-radius: 16px; padding: 24px 28px; animation: glow 3s ease-in-out infinite; }
-        .stat-label { font-size: 0.8rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; font-weight: 600; }
-        .stat-value { font-size: 2rem; font-weight: 700; color: #111827; }
-        .stat-value.active-val { color: #059669; }
-        .stat-value.inactive-val { color: #dc2626; }
-        .stat-value.payroll-val { font-size: 1.5rem; color: #d97706; }
+        /* Stats */
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); }
+        .stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 8px; }
+        .stat-val { font-size: 2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--text); }
+        .sv-active { color: var(--green); }
+        .sv-inactive { color: var(--red); }
+        .sv-payroll { font-size: 1.4rem; color: var(--amber); }
 
         /* Alert */
-        .alert { padding: 14px 20px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; font-weight: 600; background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
+        .alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 16px; background: var(--green-light); color: var(--green); border: 1px solid #bbf7d0; }
 
-        /* Main card */
-        .card { background: #ffffff; backdrop-filter: blur(20px); border: 1px solid rgba(209, 213, 219, 0.6); border-radius: 16px; padding: 36px; margin-bottom: 24px; animation: glow 3s ease-in-out infinite; }
-        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-        .card-title { font-size: 1rem; font-weight: 600; color: #111827; }
+        /* Card */
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+        .card-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); }
+        .card-title { font-size: 14px; font-weight: 700; color: var(--text); }
+        .card-body { padding: 20px 24px; }
 
-        /* Search / Filter row */
-        .filter-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; }
-        .search-input { flex: 1; min-width: 180px; padding: 11px 16px; border: 1.5px solid rgba(209, 213, 219, 0.8); border-radius: 10px; background: #f3f4f6; color: #111827; font-family: 'Inter', sans-serif; font-size: 0.9rem; }
-        .search-input::placeholder { color: rgba(107, 114, 128, 0.6); }
-        .search-input:focus { outline: none; border-color: #3b82f6; background: #ffffff; }
-        .filter-select { padding: 11px 16px; border: 1.5px solid rgba(209, 213, 219, 0.8); border-radius: 10px; background: #f3f4f6; color: #111827; font-family: 'Inter', sans-serif; font-size: 0.9rem; cursor: pointer; }
-        .filter-select option { background: #ffffff; color: #111827; }
-        .filter-select:focus { outline: none; border-color: #3b82f6; background: #ffffff; }
-        .btn-search { padding: 11px 20px; background: rgba(243, 244, 246, 0.8); border: 1.5px solid rgba(209, 213, 219, 0.8); border-radius: 10px; color: #374151; font-family: 'Inter', sans-serif; font-size: 0.9rem; cursor: pointer; transition: all 0.3s; }
-        .btn-search:hover { background: rgba(229, 231, 235, 0.8); color: #111827; }
-        .btn-clear { padding: 11px 16px; background: transparent; border: 1.5px solid rgba(209, 213, 219, 0.8); border-radius: 10px; color: #6b7280; font-family: 'Inter', sans-serif; font-size: 0.9rem; text-decoration: none; display: inline-flex; align-items: center; transition: all 0.3s; }
-        .btn-clear:hover { color: #374151; border-color: rgba(107, 114, 128, 0.3); }
+        /* Buttons */
+        .btn-primary { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 8px; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: background 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary:hover { background: var(--accent-dark); }
+        .btn-secondary { padding: 9px 16px; background: var(--surface2); color: var(--text2); border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-secondary:hover { background: var(--border); color: var(--text); }
+        .btn-edit   { padding: 6px 12px; background: var(--surface2); color: var(--text2); border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+        .btn-edit:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+        .btn-delete { padding: 6px 12px; background: var(--red-light); color: var(--red); border: 1px solid #fecaca; border-radius: 6px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+        .btn-delete:hover { background: #fee2e2; }
+
+        /* Filter */
+        .filter-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; }
+        .search-input { flex: 1; min-width: 180px; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface2); font-family: inherit; font-size: 13.5px; color: var(--text); }
+        .search-input::placeholder { color: var(--text3); }
+        .search-input:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+        .filter-select { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface2); font-family: inherit; font-size: 13.5px; color: var(--text); cursor: pointer; }
+        .filter-select:focus { outline: none; border-color: var(--accent); }
 
         /* Table */
-        .table-wrapper { overflow-x: auto; border-radius: 12px; }
+        .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; }
-        thead tr { background: rgba(243, 244, 246, 0.8); }
-        th { padding: 14px 16px; text-align: left; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.6px; color: #374151; font-weight: 600; white-space: nowrap; }
-        td { padding: 14px 16px; color: #4b5563; font-size: 0.9rem; border-top: 1px solid rgba(209, 213, 219, 0.5); white-space: nowrap; }
-        tbody tr:hover { background: rgba(243, 244, 246, 0.5); }
-        .salary-cell { color: #059669; font-weight: 600; }
-
-        /* Badges */
-        .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
-        .badge-morning { background: rgba(217, 119, 6, 0.12); color: #b45309; border: 1px solid rgba(217, 119, 6, 0.2); }
-        .badge-afternoon { background: rgba(34, 197, 94, 0.12); color: #059669; border: 1px solid rgba(34, 197, 94, 0.2); }
-        .badge-night { background: rgba(59, 130, 246, 0.12); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.2); }
-        .badge-active { background: rgba(34, 197, 94, 0.12); color: #059669; border: 1px solid rgba(34, 197, 94, 0.2); }
-        .badge-inactive { background: rgba(220, 38, 38, 0.12); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.2); }
-
-        /* Role badge */
-        .role-badge { padding: 3px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.3px; }
-        .role-staff { background: rgba(59, 130, 246, 0.12); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.2); }
-        .role-admin { background: rgba(217, 119, 6, 0.12); color: #b45309; border: 1px solid rgba(217, 119, 6, 0.2); }
-        .role-cook { background: rgba(220, 38, 38, 0.12); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.2); }
-        .role-other { background: rgba(107, 114, 128, 0.15); color: #374151; border: 1px solid rgba(107, 114, 128, 0.2); }
-
-        /* Actions */
-        .action-group { display: flex; gap: 8px; }
-        .btn-edit, .btn-delete { padding: 7px 14px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.3s; }
-        .btn-edit { background: rgba(243, 244, 246, 0.8); color: #374151; }
-        .btn-edit:hover { background: rgba(229, 231, 235, 0.8); color: #111827; }
-        .btn-delete { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
-        .btn-delete:hover { background: rgba(220, 38, 38, 0.15); }
-
-        /* Primary button */
-        .btn-primary { padding: 11px 24px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; border: none; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.3s; box-shadow: 0 6px 18px rgba(59, 130, 246, 0.25); display: inline-flex; align-items: center; gap: 6px; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(59, 130, 246, 0.35); }
+        thead th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); background: var(--surface2); border-bottom: 1px solid var(--border); white-space: nowrap; }
+        tbody td { padding: 12px 14px; font-size: 13.5px; color: var(--text); border-bottom: 1px solid var(--border); white-space: nowrap; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover td { background: var(--surface2); }
+        .salary-cell { color: var(--green); font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+        .badge { display: inline-flex; padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 600; }
+        .badge-morning   { background: var(--amber-light); color: var(--amber); }
+        .badge-afternoon { background: var(--green-light); color: var(--green); }
+        .badge-night     { background: var(--accent-light); color: var(--accent); }
+        .badge-active    { background: var(--green-light); color: var(--green); }
+        .badge-inactive  { background: var(--red-light); color: var(--red); }
+        .role-badge { padding: 3px 9px; border-radius: 5px; font-size: 11.5px; font-weight: 600; }
+        .role-staff  { background: var(--accent-light); color: var(--accent); }
+        .role-admin  { background: var(--amber-light); color: var(--amber); }
+        .role-cook   { background: var(--red-light); color: var(--red); }
+        .role-other  { background: #f3f4f6; color: var(--text2); }
+        .action-group { display: flex; gap: 6px; }
+        .empty-state { text-align: center; padding: 48px 20px; color: var(--text3); font-size: 13.5px; }
+        .empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
 
         /* Modal */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(4px); z-index: 100; align-items: center; justify-content: center; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; }
         .modal-overlay.active { display: flex; }
-        .modal { background: #ffffff; border: 1px solid rgba(209, 213, 219, 0.8); border-radius: 16px; padding: 32px; width: 100%; max-width: 520px; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes glow { 0%, 100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); } 50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2); } }
-        .modal-title { font-size: 1.2rem; font-weight: 700; color: #111827; margin-bottom: 24px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 16px; }
+        .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px 30px; width: 100%; max-width: 560px; box-shadow: var(--shadow-md); animation: slideUp 0.2s ease; }
+        @keyframes slideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+        .modal-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 22px; }
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 16px; }
         .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-label { font-size: 0.78rem; color: #374151; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-        .form-input, .form-select { padding: 12px 16px; border: 1.5px solid rgba(209, 213, 219, 0.8); border-radius: 10px; background: #f3f4f6; color: #111827; font-family: 'Inter', sans-serif; font-size: 0.95rem; transition: all 0.3s; width: 100%; }
-        .form-input::placeholder { color: rgba(107, 114, 128, 0.6); }
-        .form-input:focus, .form-select:focus { outline: none; border-color: #3b82f6; background: #ffffff; }
-        .form-select option { background: #ffffff; color: #111827; }
-        .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
-        .btn-cancel { padding: 11px 22px; background: transparent; border: 1.5px solid rgba(209, 213, 219, 0.8); border-radius: 10px; color: #6b7280; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s; }
-        .btn-cancel:hover { background: rgba(243, 244, 246, 0.8); }
+        .form-label { font-size: 11.5px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-input, .form-select { padding: 10px 13px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface2); font-family: inherit; font-size: 13.5px; color: var(--text); transition: border-color 0.15s; width: 100%; }
+        .form-input::placeholder { color: var(--text3); }
+        .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+        .btn-cancel { padding: 10px 18px; background: transparent; border: 1.5px solid var(--border); border-radius: 8px; color: var(--text2); font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+        .btn-cancel:hover { background: var(--surface2); }
 
-        /* Empty state */
-        .empty-state { text-align: center; padding: 50px 20px; color: #6b7280; }
-        .empty-icon  { font-size: 3rem; margin-bottom: 12px; }
+        @media (max-width: 900px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .main-area { margin-left: 0; } .content { padding: 16px; } }
     </style>
 </head>
 <body>
-    <div class="bg-pattern"></div>
-    <div class="bg-shapes"></div>
-    <div class="page-wrapper">
 
-    <!-- Topbar -->
-    <div class="topbar">
-        <div class="topbar-left">
-            <a href="/dashboard" class="back-btn">← Back</a>
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-mark">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 2H7a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V4a2 2 0 00-2-2h-2M9 2a1 1 0 001 1h4a1 1 0 001-1M9 2a1 1 0 000 1h4a1 1 0 000-1M12 11h4M12 15h4M8 11h.01M8 15h.01"/></svg>
+            </div>
             <div>
-                <div class="page-title">👷 Labor Management</div>
-                <div class="page-subtitle">Manage staff &amp; schedules</div>
+                <div class="brand-name">Ordering System</div>
+                <div class="brand-sub">Management Portal</div>
             </div>
         </div>
-        <button class="btn-primary" onclick="openAddModal()">+ Add Staff</button>
     </div>
-
-    <div th:if="${success}" class="alert" th:text="${success}"></div>
-
-    <!-- Summary Stats -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-label">Total Staff</div>
-            <div class="stat-value" th:text="${totalStaff != null ? totalStaff : laborList.size()}">0</div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="/dashboard" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Dashboard
+        </a>
+        <a href="/orders" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            Orders
+        </a>
+        <div class="nav-section-label">Admin</div>
+        <a href="/items" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+            Items
+        </a>
+        <a href="/users" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            Users
+        </a>
+        <a href="/labor" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Labor
+        </a>
+        <a href="/reports" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Reports
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar">A</div>
+            <div><div class="user-name">Admin</div><div class="user-role">Administrator</div></div>
         </div>
-        <div class="stat-card">
-            <div class="stat-label">Active</div>
-            <div class="stat-value active-val" th:text="${activeCount != null ? activeCount : 0}">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Inactive</div>
-            <div class="stat-value inactive-val" th:text="${inactiveCount != null ? inactiveCount : 0}">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Total Payroll</div>
-            <div class="stat-value payroll-val" th:text="'₱' + ${#numbers.formatDecimal(totalPayroll != null ? totalPayroll : 0, 1, 2)}">₱0.00</div>
-        </div>
-    </div>
-
-    <!-- Staff Table Card -->
-    <div class="card">
-        <div class="card-header">
-            <div class="card-title">📋 All Staff</div>
-        </div>
-
-        <form method="get" th:action="@{/labor}">
-            <div class="filter-row">
-                <input type="text" name="search" class="search-input" placeholder="Search staff name..." th:value="${search}">
-                <select name="role" class="filter-select">
-                    <option value="">All Roles</option>
-                    <option value="Staff"    th:selected="${selectedRole == 'Staff'}">Staff</option>
-                    <option value="Admin"    th:selected="${selectedRole == 'Admin'}">Admin</option>
-                    <option value="Cook"     th:selected="${selectedRole == 'Cook'}">Cook</option>
-                    <option value="Cashier"  th:selected="${selectedRole == 'Cashier'}">Cashier</option>
-                    <option value="Waiter"   th:selected="${selectedRole == 'Waiter'}">Waiter</option>
-                </select>
-                <select name="status" class="filter-select">
-                    <option value="">All Status</option>
-                    <option value="Active"   th:selected="${selectedStatus == 'Active'}">Active</option>
-                    <option value="Inactive" th:selected="${selectedStatus == 'Inactive'}">Inactive</option>
-                </select>
-                <button type="submit" class="btn-search">🔍 Search</button>
-                <a href="/labor" class="btn-clear">✕ Clear</a>
-            </div>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="logout-btn">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                Sign Out
+            </button>
         </form>
+    </div>
+</aside>
 
-        <div class="table-wrapper">
-            <table th:if="${!laborList.isEmpty()}">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Full Name</th>
-                        <th>Role</th>
-                        <th>Shift</th>
-                        <th>Status</th>
-                        <th>Phone</th>
-                        <th>Salary</th>
-                        <th>Hire Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!--
-                        List is sorted DESC by ID in the controller (newest first).
-                        laborStat.index + 1 gives 1, 2, 3... so the newest entry
-                        is always #1 at the top. labor.id stays in data-id so
-                        Edit/Delete still target the correct database record.
-                    -->
-                    <tr th:each="labor, laborStat : ${laborList}"
-                        th:data-id="${labor.id}"
-                        th:data-name="${labor.name}"
-                        th:data-role="${labor.role}"
-                        th:data-shift="${labor.shift}"
-                        th:data-status="${labor.status}"
-                        th:data-salary="${labor.salary}"
-                        th:data-contact="${labor.contact}"
-                        th:data-hiredate="${labor.hireDate}">
+<div class="main-area">
+    <header class="topbar">
+        <div class="topbar-title">Labor Management</div>
+        <button class="btn-primary" onclick="openAddModal()">+ Add Staff</button>
+    </header>
 
-                        <!-- Row number based on list position, not database ID -->
-                        <td th:text="${laborStat.index + 1}"></td>
+    <main class="content">
+        <div th:if="${success}" class="alert" th:text="${success}"></div>
 
-                        <td th:text="${labor.name}"></td>
-                        <td>
-                            <span class="role-badge"
-                                th:classappend="${labor.role == 'Admin'} ? 'role-admin' : (${labor.role == 'Cook'} ? 'role-cook' : (${labor.role == 'Staff'} ? 'role-staff' : 'role-other'))"
-                                th:text="${labor.role}"></span>
-                        </td>
-                        <td>
-                            <span class="badge"
-                                th:classappend="${labor.shift == 'Morning'} ? 'badge-morning' : (${labor.shift == 'Afternoon'} ? 'badge-afternoon' : 'badge-night')"
-                                th:text="${labor.shift}"></span>
-                        </td>
-                        <td>
-                            <span class="badge"
-                                th:classappend="${labor.status == 'Active'} ? 'badge-active' : 'badge-inactive'"
-                                th:text="${labor.status != null ? labor.status : 'Active'}"></span>
-                        </td>
-                        <td th:text="${labor.contact != null ? labor.contact : '-'}"></td>
-                        <td class="salary-cell" th:text="'₱' + ${#numbers.formatDecimal(labor.salary, 1, 2)}"></td>
-                        <td th:text="${labor.hireDate != null ? labor.hireDate : '-'}"></td>
-                        <td>
-                            <div class="action-group">
-                                <button class="btn-edit" onclick="openEditFromRow(this)">✏️ Edit</button>
-                                <form th:action="@{/labor/delete/{id}(id=${labor.id})}" method="post" style="display:inline;"
-                                      onsubmit="return confirm('Remove this staff?')">
-                                    <button type="submit" class="btn-delete">🗑️ Delete</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="empty-state" th:if="${laborList.isEmpty()}">
-                <div class="empty-icon">👥</div>
-                <p>No staff found. Add one above!</p>
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-label">Total Staff</div>
+                <div class="stat-val" th:text="${totalStaff != null ? totalStaff : laborList.size()}">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active</div>
+                <div class="stat-val sv-active" th:text="${activeCount != null ? activeCount : 0}">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Inactive</div>
+                <div class="stat-val sv-inactive" th:text="${inactiveCount != null ? inactiveCount : 0}">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Payroll</div>
+                <div class="stat-val sv-payroll" th:text="'₱' + ${#numbers.formatDecimal(totalPayroll != null ? totalPayroll : 0, 1, 2)}">₱0.00</div>
             </div>
         </div>
-    </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">All Staff</div>
+            </div>
+            <div class="card-body">
+                <form method="get" th:action="@{/labor}">
+                    <div class="filter-row">
+                        <input type="text" name="search" class="search-input" placeholder="Search staff name…" th:value="${search}">
+                        <select name="role" class="filter-select">
+                            <option value="">All Roles</option>
+                            <option value="Staff"   th:selected="${selectedRole=='Staff'}">Staff</option>
+                            <option value="Admin"   th:selected="${selectedRole=='Admin'}">Admin</option>
+                            <option value="Cook"    th:selected="${selectedRole=='Cook'}">Cook</option>
+                            <option value="Cashier" th:selected="${selectedRole=='Cashier'}">Cashier</option>
+                            <option value="Waiter"  th:selected="${selectedRole=='Waiter'}">Waiter</option>
+                        </select>
+                        <select name="status" class="filter-select">
+                            <option value="">All Status</option>
+                            <option value="Active"   th:selected="${selectedStatus=='Active'}">Active</option>
+                            <option value="Inactive" th:selected="${selectedStatus=='Inactive'}">Inactive</option>
+                        </select>
+                        <button type="submit" class="btn-secondary">🔍 Search</button>
+                        <a href="/labor" class="btn-secondary">✕ Clear</a>
+                    </div>
+                </form>
+
+                <div class="table-wrap">
+                    <table th:if="${!laborList.isEmpty()}">
+                        <thead>
+                            <tr><th>#</th><th>Full Name</th><th>Role</th><th>Shift</th><th>Status</th><th>Phone</th><th>Salary</th><th>Hire Date</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="labor, s : ${laborList}"
+                                th:data-id="${labor.id}" th:data-name="${labor.name}"
+                                th:data-role="${labor.role}" th:data-shift="${labor.shift}"
+                                th:data-status="${labor.status}" th:data-salary="${labor.salary}"
+                                th:data-contact="${labor.contact}" th:data-hiredate="${labor.hireDate}">
+                                <td th:text="${s.index + 1}" style="color:var(--text3)"></td>
+                                <td style="font-weight:600" th:text="${labor.name}"></td>
+                                <td>
+                                    <span class="role-badge"
+                                        th:classappend="${labor.role=='Admin'} ? 'role-admin' : (${labor.role=='Cook'} ? 'role-cook' : (${labor.role=='Staff'} ? 'role-staff' : 'role-other'))"
+                                        th:text="${labor.role}"></span>
+                                </td>
+                                <td>
+                                    <span class="badge"
+                                        th:classappend="${labor.shift=='Morning'} ? 'badge-morning' : (${labor.shift=='Afternoon'} ? 'badge-afternoon' : 'badge-night')"
+                                        th:text="${labor.shift}"></span>
+                                </td>
+                                <td>
+                                    <span class="badge"
+                                        th:classappend="${labor.status=='Active'} ? 'badge-active' : 'badge-inactive'"
+                                        th:text="${labor.status != null ? labor.status : 'Active'}"></span>
+                                </td>
+                                <td style="color:var(--text2)" th:text="${labor.contact != null ? labor.contact : '-'}"></td>
+                                <td class="salary-cell" th:text="'₱' + ${#numbers.formatDecimal(labor.salary, 1, 2)}"></td>
+                                <td style="color:var(--text2)" th:text="${labor.hireDate != null ? labor.hireDate : '-'}"></td>
+                                <td>
+                                    <div class="action-group">
+                                        <button class="btn-edit" onclick="openEditFromRow(this)">Edit</button>
+                                        <form th:action="@{/labor/delete/{id}(id=${labor.id})}" method="post" style="display:inline" onsubmit="return confirm('Remove this staff?')">
+                                            <button type="submit" class="btn-delete">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="empty-state" th:if="${laborList.isEmpty()}">
+                        <div class="empty-icon">👥</div>
+                        <p>No staff found. Add one using the button above.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 </div>
 
-<!-- Add Staff Modal -->
+<!-- Add Modal -->
 <div class="modal-overlay" id="addModal">
     <div class="modal">
-        <div class="modal-title">➕ Add New Staff</div>
+        <div class="modal-title">Add New Staff</div>
         <form th:action="@{/labor/add}" method="post">
             <div class="form-grid">
                 <div class="form-group">
@@ -329,7 +312,7 @@
                 <div class="form-group">
                     <label class="form-label">Role</label>
                     <select name="role" class="form-select" required>
-                        <option value="" disabled selected>Select role...</option>
+                        <option value="" disabled selected>Select role…</option>
                         <option value="Staff">Staff</option>
                         <option value="Admin">Admin</option>
                         <option value="Cook">Cook</option>
@@ -340,7 +323,7 @@
                 <div class="form-group">
                     <label class="form-label">Shift</label>
                     <select name="shift" class="form-select" required>
-                        <option value="" disabled selected>Select shift...</option>
+                        <option value="" disabled selected>Select shift…</option>
                         <option value="Morning">Morning</option>
                         <option value="Afternoon">Afternoon</option>
                         <option value="Night">Night</option>
@@ -359,7 +342,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Phone</label>
-                    <input type="text" name="contact" class="form-input" placeholder="e.g. 09XX-XXX-XXXX">
+                    <input type="text" name="contact" class="form-input" placeholder="09XX-XXX-XXXX">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Hire Date</label>
@@ -368,16 +351,16 @@
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn-cancel" onclick="closeAdd()">Cancel</button>
-                <button type="submit" class="btn-primary">+ Add Staff</button>
+                <button type="submit" class="btn-primary">Add Staff</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Edit Staff Modal -->
+<!-- Edit Modal -->
 <div class="modal-overlay" id="editModal">
     <div class="modal">
-        <div class="modal-title">✏️ Edit Staff</div>
+        <div class="modal-title">Edit Staff</div>
         <form id="editForm" method="post">
             <div class="form-grid">
                 <div class="form-group">
@@ -431,12 +414,8 @@
 </div>
 
 <script>
-    function openAddModal() {
-        document.getElementById('addModal').classList.add('active');
-    }
-    function closeAdd() {
-        document.getElementById('addModal').classList.remove('active');
-    }
+    function openAddModal() { document.getElementById('addModal').classList.add('active'); }
+    function closeAdd()     { document.getElementById('addModal').classList.remove('active'); }
     function openEditFromRow(btn) {
         const row = btn.closest('tr');
         document.getElementById('editName').value     = row.dataset.name;
@@ -446,19 +425,12 @@
         document.getElementById('editSalary').value   = row.dataset.salary;
         document.getElementById('editContact').value  = row.dataset.contact || '';
         document.getElementById('editHireDate').value = row.dataset.hiredate || '';
-        // Uses the real database ID for the edit URL — not the display number
         document.getElementById('editForm').action    = '/labor/edit/' + row.dataset.id;
         document.getElementById('editModal').classList.add('active');
     }
-    function closeEdit() {
-        document.getElementById('editModal').classList.remove('active');
-    }
-    document.getElementById('addModal').addEventListener('click', function(e) {
-        if (e.target === this) closeAdd();
-    });
-    document.getElementById('editModal').addEventListener('click', function(e) {
-        if (e.target === this) closeEdit();
-    });
+    function closeEdit() { document.getElementById('editModal').classList.remove('active'); }
+    document.getElementById('addModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeAdd(); });
+    document.getElementById('editModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeEdit(); });
 </script>
 </body>
 </html>

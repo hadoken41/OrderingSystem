@@ -9,9 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 @Controller
 @RequestMapping("/items")
@@ -21,28 +19,6 @@ public class ItemController {
 
     public ItemController(ItemRepository itemRepository) {
         this.itemRepository = itemRepository;
-    }
-
-    /**
-     * Calculate inventory summary stats
-     */
-    private Map<String, Object> getInventorySummary(List<Item> items) {
-        long totalItems = items.size();
-        long lowStockItems = items.stream()
-            .filter(i -> i.getQuantity() < 5)
-            .count();
-        double inventoryValue = items.stream()
-            .mapToDouble(item -> item.getPrice() * item.getQuantity())
-            .sum();
-        double averagePrice = items.isEmpty() ? 0 :
-            items.stream().mapToDouble(Item::getPrice).average().orElse(0);
-
-        Map<String, Object> summary = new HashMap<>();
-        summary.put("totalItems", totalItems);
-        summary.put("lowStockItems", lowStockItems);
-        summary.put("inventoryValue", inventoryValue);
-        summary.put("averagePrice", averagePrice);
-        return summary;
     }
 
     @GetMapping
@@ -58,14 +34,24 @@ public class ItemController {
             items = itemRepository.findAll();
         }
 
-        // Add inventory summary
-        Map<String, Object> summary = getInventorySummary(items);
+        // Summary stats via DB queries — no in-memory calculation
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("totalItems",     itemRepository.count());
+        summary.put("lowStockItems",  itemRepository.countLowStockItems());
+        summary.put("inventoryValue", itemRepository.calculateTotalInventoryValue());
+        summary.put("averagePrice",   itemRepository.averagePrice());
 
-        model.addAttribute("items", items);
-        model.addAttribute("search", search);
+        model.addAttribute("items",            items);
+        model.addAttribute("search",           search);
         model.addAttribute("selectedCategory", category);
         model.addAttribute("inventorySummary", summary);
         return "items";
+    }
+
+    private boolean hasPermission(Authentication auth) {
+        return auth.getAuthorities().stream()
+            .anyMatch(a -> a.getAuthority().equals("ROLE_STAFF") ||
+                           a.getAuthority().equals("ROLE_ADMIN"));
     }
 
     @PostMapping("/add")
@@ -77,21 +63,14 @@ public class ItemController {
                           @RequestParam(required = false) String description,
                           Authentication authentication,
                           RedirectAttributes ra) {
-        // Check if user has permission (only STAFF and ADMIN can add items)
-        boolean hasPermission = authentication.getAuthorities().stream()
-            .anyMatch(auth -> auth.getAuthority().equals("ROLE_STAFF") || auth.getAuthority().equals("ROLE_ADMIN"));
-
-        if (!hasPermission) {
+        if (!hasPermission(authentication)) {
             ra.addFlashAttribute("error", "You don't have permission to add items!");
             return "redirect:/items";
         }
-
-        // Check if SKU already exists
         if (itemRepository.findBySku(sku).isPresent()) {
             ra.addFlashAttribute("error", "SKU already exists!");
             return "redirect:/items";
         }
-
         Item item = new Item();
         item.setName(name);
         item.setSku(sku);
@@ -115,25 +94,15 @@ public class ItemController {
                            @RequestParam(required = false) String description,
                            Authentication authentication,
                            RedirectAttributes ra) {
-        // Check if user has permission (only STAFF and ADMIN can edit items)
-        boolean hasPermission = authentication.getAuthorities().stream()
-            .anyMatch(auth -> auth.getAuthority().equals("ROLE_STAFF") || auth.getAuthority().equals("ROLE_ADMIN"));
-
-        if (!hasPermission) {
+        if (!hasPermission(authentication)) {
             ra.addFlashAttribute("error", "You don't have permission to edit items!");
             return "redirect:/items";
         }
-
         Item item = itemRepository.findById(id).orElseThrow();
-
-        // Check if SKU already exists (but allow if it's the same item's SKU)
-        if (!item.getSku().equals(sku)) {
-            if (itemRepository.findBySku(sku).isPresent()) {
-                ra.addFlashAttribute("error", "SKU already exists!");
-                return "redirect:/items";
-            }
+        if (!item.getSku().equals(sku) && itemRepository.findBySku(sku).isPresent()) {
+            ra.addFlashAttribute("error", "SKU already exists!");
+            return "redirect:/items";
         }
-
         item.setName(name);
         item.setSku(sku);
         item.setCategory(category);
@@ -148,17 +117,12 @@ public class ItemController {
 
     @PostMapping("/delete/{id}")
     public String deleteItem(@PathVariable Long id,
-                            Authentication authentication,
-                            RedirectAttributes ra) {
-        // Check if user has permission (only STAFF and ADMIN can delete items)
-        boolean hasPermission = authentication.getAuthorities().stream()
-            .anyMatch(auth -> auth.getAuthority().equals("ROLE_STAFF") || auth.getAuthority().equals("ROLE_ADMIN"));
-
-        if (!hasPermission) {
+                             Authentication authentication,
+                             RedirectAttributes ra) {
+        if (!hasPermission(authentication)) {
             ra.addFlashAttribute("error", "You don't have permission to delete items!");
             return "redirect:/items";
         }
-
         itemRepository.deleteById(id);
         ra.addFlashAttribute("success", "Item deleted successfully!");
         return "redirect:/items";

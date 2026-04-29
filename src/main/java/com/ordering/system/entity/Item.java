@@ -4,7 +4,10 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "items")
+@Table(name = "items", indexes = {
+    @Index(name = "idx_item_sku",      columnList = "sku"),
+    @Index(name = "idx_item_category", columnList = "category")
+})
 public class Item {
 
     @Id
@@ -27,32 +30,29 @@ public class Item {
     private Integer quantity;
 
     private String description;
-
     private LocalDateTime updatedAt;
 
     public Item() {}
 
+    @PreUpdate
+    public void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-
     public String getSku() { return sku; }
     public void setSku(String sku) { this.sku = sku; }
-
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
-
     public Double getPrice() { return price; }
     public void setPrice(Double price) { this.price = price; }
-
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
-
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

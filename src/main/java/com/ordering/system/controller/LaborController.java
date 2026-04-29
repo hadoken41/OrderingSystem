@@ -9,9 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/labor")
@@ -29,44 +27,27 @@ public class LaborController {
                             @RequestParam(required = false) String role,
                             @RequestParam(required = false) String status,
                             Model model) {
-
-        // Fetch all, copy to mutable list, sort by id DESC
-        // Newest staff added will always appear at the top as #1
-        List<Labor> laborList = new ArrayList<>(laborRepository.findAll());
-        laborList.sort((a, b) -> Long.compare(b.getId(), a.getId()));
-
+        // All filtering done in DB — no findAll() + stream
+        List<Labor> laborList;
         if (search != null && !search.isBlank()) {
-            laborList = laborList.stream()
-                .filter(l -> l.getName().toLowerCase().contains(search.toLowerCase()))
-                .collect(Collectors.toList());
-        }
-        if (role != null && !role.isBlank()) {
-            laborList = laborList.stream()
-                .filter(l -> l.getRole().equalsIgnoreCase(role))
-                .collect(Collectors.toList());
-        }
-        if (status != null && !status.isBlank()) {
-            laborList = laborList.stream()
-                .filter(l -> l.getStatus().equalsIgnoreCase(status))
-                .collect(Collectors.toList());
+            laborList = laborRepository.findByNameContainingIgnoreCaseOrderByIdDesc(search);
+        } else if (role != null && !role.isBlank()) {
+            laborList = laborRepository.findByRoleIgnoreCaseOrderByIdDesc(role);
+        } else if (status != null && !status.isBlank()) {
+            laborList = laborRepository.findByStatusIgnoreCaseOrderByIdDesc(status);
+        } else {
+            laborList = laborRepository.findAllByOrderByIdDesc();
         }
 
-        List<Labor> allStaff = new ArrayList<>(laborRepository.findAll());
-        long activeCount   = allStaff.stream().filter(l -> "Active".equalsIgnoreCase(l.getStatus())).count();
-        long inactiveCount = allStaff.stream().filter(l -> "Inactive".equalsIgnoreCase(l.getStatus())).count();
-        double totalPayroll = allStaff.stream()
-            .filter(l -> "Active".equalsIgnoreCase(l.getStatus()))
-            .mapToDouble(l -> l.getSalary() != null ? l.getSalary() : 0)
-            .sum();
-
-        model.addAttribute("laborList", laborList);
-        model.addAttribute("search", search);
-        model.addAttribute("selectedRole", role);
+        // Stats via DB queries
+        model.addAttribute("laborList",      laborList);
+        model.addAttribute("search",         search);
+        model.addAttribute("selectedRole",   role);
         model.addAttribute("selectedStatus", status);
-        model.addAttribute("totalStaff", allStaff.size());
-        model.addAttribute("activeCount", activeCount);
-        model.addAttribute("inactiveCount", inactiveCount);
-        model.addAttribute("totalPayroll", totalPayroll);
+        model.addAttribute("totalStaff",     laborRepository.count());
+        model.addAttribute("activeCount",    laborRepository.countActive());
+        model.addAttribute("inactiveCount",  laborRepository.countInactive());
+        model.addAttribute("totalPayroll",   laborRepository.sumActiveSalary());
 
         return "labor";
     }
@@ -112,11 +93,8 @@ public class LaborController {
         labor.setStatus(status != null ? status : "Active");
         labor.setSalary(salary);
         labor.setContact(contact);
-        if (hireDate != null && !hireDate.isBlank()) {
-            labor.setHireDate(LocalDate.parse(hireDate));
-        } else {
-            labor.setHireDate(null);
-        }
+        labor.setHireDate(hireDate != null && !hireDate.isBlank()
+            ? LocalDate.parse(hireDate) : null);
         laborRepository.save(labor);
         ra.addFlashAttribute("success", "Staff updated successfully!");
         return "redirect:/labor";
