@@ -219,28 +219,28 @@
             <div class="stat-card">
                 <div class="stat-icon">📦</div>
                 <div>
-                    <div class="stat-val sv-green" th:text="${inventorySummary.totalItems}">0</div>
+                    <div class="stat-val sv-green" th:text="${inventorySummary['totalItems']}">0</div>
                     <div class="stat-label">Total Items</div>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">⚠️</div>
                 <div>
-                    <div class="stat-val sv-red" th:text="${inventorySummary.lowStockItems}">0</div>
+                    <div class="stat-val sv-red" th:text="${inventorySummary['lowStockItems']}">0</div>
                     <div class="stat-label">Low Stock</div>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">💎</div>
                 <div>
-                    <div class="stat-val sv-amber" th:text="'₱' + ${#numbers.formatDecimal(inventorySummary.inventoryValue, 1, 2)}">₱0.00</div>
+                    <div class="stat-val sv-amber" th:text="'₱' + ${#numbers.formatDecimal(inventorySummary['inventoryValue'], 1, 2)}">₱0.00</div>
                     <div class="stat-label">Inventory Value</div>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">📊</div>
                 <div>
-                    <div class="stat-val sv-blue" th:text="'₱' + ${#numbers.formatDecimal(inventorySummary.averagePrice, 1, 2)}">₱0.00</div>
+                    <div class="stat-val sv-blue" th:text="'₱' + ${#numbers.formatDecimal(inventorySummary['averagePrice'], 1, 2)}">₱0.00</div>
                     <div class="stat-label">Avg Price</div>
                 </div>
             </div>
