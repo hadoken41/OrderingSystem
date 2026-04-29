@@ -22,16 +22,11 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
-
-                // USER and above can access orders
-                .requestMatchers("/orders", "/orders/**").hasAnyRole("USER", "STAFF", "ADMIN")
-
-                // ADMIN only
-                .requestMatchers("/items/**").hasRole("ADMIN")
-                .requestMatchers("/labor/**").hasRole("ADMIN")
-                .requestMatchers("/reports/**").hasRole("ADMIN")
-                .requestMatchers("/users/**").hasRole("ADMIN")
-
+                .requestMatchers("/orders", "/orders/**").hasAnyAuthority("USER", "STAFF", "ADMIN")
+                .requestMatchers("/items/**").hasAuthority("ADMIN")
+                .requestMatchers("/labor/**").hasAuthority("ADMIN")
+                .requestMatchers("/reports/**").hasAuthority("ADMIN")
+                .requestMatchers("/users/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -47,7 +42,6 @@ public class SecurityConfig {
             .exceptionHandling(ex -> ex
                 .accessDeniedPage("/dashboard")
             );
-
         return http.build();
     }
 }
