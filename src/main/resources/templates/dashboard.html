@@ -1,46 +1,49 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard — Ordering System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --sidebar-bg: #111827;
-            --sidebar-w: 224px;
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
-            --accent-light: #eff6ff;
-            --bg: #f0f4f8;
+            --g1: #6C63FF;
+            --g2: #A855F7;
+            --g3: #EC4899;
+            --g4: #3B82F6;
+            --g5: #06B6D4;
+            --sidebar-w: 230px;
+            --bg: #f0f0fb;
             --surface: #ffffff;
-            --surface2: #f8fafc;
-            --border: #e2e8f0;
-            --text: #111827;
-            --text2: #4b5563;
-            --text3: #9ca3af;
-            --green: #059669; --green-light: #f0fdf4;
-            --amber: #d97706; --amber-light: #fffbeb;
-            --red: #dc2626;   --red-light: #fef2f2;
-            --purple: #7c3aed; --purple-light: #f5f3ff;
-            --radius: 10px;
-            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --surface2: #f7f7fd;
+            --border: #e8e8f4;
+            --text: #1a1a2e;
+            --text2: #4a4a6a;
+            --text3: #9090b8;
+            --green: #059669;  --green-light: #f0fdf4;
+            --amber: #d97706;  --amber-light: #fffbeb;
+            --red: #dc2626;    --red-light: #fef2f2;
+            --accent: #6C63FF; --accent-light: #f0eeff;
+            --radius: 14px;
+            --shadow: 0 2px 8px rgba(108,99,255,0.06), 0 1px 3px rgba(108,99,255,0.04);
+            --shadow-md: 0 8px 32px rgba(108,99,255,0.13), 0 2px 8px rgba(168,85,247,0.08);
         }
         *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Poppins', sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
             display: flex;
         }
 
-        /* ── Sidebar ── */
+        /* ════════════════════════════════
+           SIDEBAR — Vibrant gradient
+        ════════════════════════════════ */
         .sidebar {
             width: var(--sidebar-w);
-            background: var(--sidebar-bg);
+            background: #0f0c29;
             display: flex;
             flex-direction: column;
             position: fixed;
@@ -49,109 +52,190 @@
             z-index: 100;
             overflow: hidden;
         }
-        .sidebar-brand {
-            padding: 24px 20px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+
+        /* Gradient blobs */
+        .sidebar-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(56px);
+            mix-blend-mode: screen;
+            pointer-events: none;
+            animation: sbDrift 14s ease-in-out infinite alternate;
         }
-        .brand-mark {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .sb-b1 {
+            width: 280px; height: 280px;
+            background: radial-gradient(circle, rgba(108,99,255,0.9) 0%, transparent 70%);
+            top: -80px; left: -80px;
+            animation-delay: 0s;
         }
-        .brand-icon {
-            width: 32px; height: 32px;
-            background: var(--accent);
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
+        .sb-b2 {
+            width: 220px; height: 220px;
+            background: radial-gradient(circle, rgba(168,85,247,0.8) 0%, transparent 70%);
+            top: 35%; left: -40px;
+            animation-delay: -4s;
         }
-        .brand-icon svg { width: 18px; height: 18px; fill: white; }
-        .brand-name {
-            font-size: 15px;
-            font-weight: 700;
-            color: #f9fafb;
-            letter-spacing: -0.2px;
+        .sb-b3 {
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(236,72,153,0.75) 0%, transparent 70%);
+            bottom: 80px; right: -60px;
+            animation-delay: -7s;
         }
-        .brand-sub {
-            font-size: 11px;
-            color: #6b7280;
-            margin-top: 2px;
+        .sb-b4 {
+            width: 160px; height: 160px;
+            background: radial-gradient(circle, rgba(59,130,246,0.6) 0%, transparent 70%);
+            bottom: 20%; left: 20px;
+            animation-delay: -10s;
+        }
+        @keyframes sbDrift {
+            0%   { transform: translate(0,0) scale(1); }
+            50%  { transform: translate(20px,-25px) scale(1.1); }
+            100% { transform: translate(-15px,20px) scale(0.95); }
         }
 
+        /* Wavy SVG overlay inside sidebar */
+        .sidebar-waves {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.55;
+        }
+
+        /* Grain overlay */
+        .sidebar-grain {
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* Brand */
+        .sidebar-brand {
+            padding: 24px 20px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            position: relative; z-index: 2;
+        }
+        .brand-mark { display: flex; align-items: center; gap: 10px; }
+        .brand-icon {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, var(--g1), var(--g3));
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 14px rgba(236,72,153,0.4);
+            flex-shrink: 0;
+        }
+        .brand-icon svg { width: 18px; height: 18px; fill: none; stroke: white; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .brand-name { font-size: 14.5px; font-weight: 700; color: #f9fafb; letter-spacing: -0.3px; }
+        .brand-sub  { font-size: 10.5px; color: rgba(255,255,255,0.35); margin-top: 1px; }
+
+        /* Nav */
         .sidebar-nav {
             flex: 1;
-            padding: 16px 12px;
+            padding: 14px 12px;
             overflow-y: auto;
+            position: relative; z-index: 2;
         }
         .nav-section-label {
-            font-size: 10px;
+            font-size: 9.5px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: #4b5563;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.25);
             padding: 0 8px;
-            margin: 16px 0 6px;
+            margin: 16px 0 5px;
         }
         .nav-section-label:first-child { margin-top: 0; }
         .nav-item {
             display: flex;
             align-items: center;
             gap: 9px;
-            padding: 9px 10px;
-            border-radius: 7px;
-            color: #9ca3af;
+            padding: 9px 11px;
+            border-radius: 9px;
+            color: rgba(255,255,255,0.55);
             text-decoration: none;
-            font-size: 13.5px;
+            font-size: 13px;
             font-weight: 500;
-            transition: background 0.15s, color 0.15s;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
             margin-bottom: 2px;
+            position: relative;
+            overflow: hidden;
         }
-        .nav-item:hover { background: rgba(255,255,255,0.06); color: #e5e7eb; }
-        .nav-item.active { background: rgba(37,99,235,0.18); color: #93c5fd; }
-        .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.8; }
+        .nav-item:hover {
+            background: rgba(255,255,255,0.09);
+            color: rgba(255,255,255,0.9);
+        }
+        /* Glass-magenta active */
+        .nav-item.active {
+            background: linear-gradient(110deg, rgba(168,85,247,0.35), rgba(236,72,153,0.25));
+            color: #ffffff;
+            box-shadow: 0 2px 14px rgba(236,72,153,0.25), inset 0 0 0 1px rgba(236,72,153,0.3);
+            font-weight: 600;
+        }
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 20%; bottom: 20%;
+            width: 3px;
+            background: linear-gradient(180deg, var(--g2), var(--g3));
+            border-radius: 0 3px 3px 0;
+        }
+        .nav-item svg { width: 15px; height: 15px; flex-shrink: 0; }
 
+        /* Footer */
         .sidebar-footer {
-            padding: 16px 12px;
-            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 14px 12px;
+            border-top: 1px solid rgba(255,255,255,0.07);
+            position: relative; z-index: 2;
         }
         .user-info {
             display: flex;
             align-items: center;
             gap: 10px;
             padding: 8px 10px;
-            border-radius: 8px;
-            background: rgba(255,255,255,0.04);
+            border-radius: 9px;
+            background: rgba(255,255,255,0.05);
             margin-bottom: 8px;
         }
         .user-avatar {
             width: 30px; height: 30px;
-            background: var(--accent);
+            background: linear-gradient(135deg, var(--g1), var(--g3));
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             color: white;
             font-size: 12px;
             font-weight: 700;
             flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(236,72,153,0.35);
         }
-        .user-name { font-size: 13px; font-weight: 600; color: #e5e7eb; }
-        .user-role { font-size: 11px; color: #6b7280; margin-top: 1px; }
+        .user-name { font-size: 12.5px; font-weight: 600; color: #f0f0ff; }
+        .user-role { font-size: 10.5px; color: rgba(255,255,255,0.3); margin-top: 1px; }
         .logout-form { margin: 0; }
         .logout-btn {
             width: 100%;
             padding: 8px 10px;
             background: transparent;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 7px;
-            color: #6b7280;
-            font-size: 12.5px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: rgba(255,255,255,0.4);
+            font-size: 12px;
             font-weight: 500;
             cursor: pointer;
-            font-family: inherit;
+            font-family: 'Poppins', sans-serif;
             transition: all 0.15s;
             display: flex; align-items: center; justify-content: center; gap: 6px;
         }
-        .logout-btn:hover { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #f87171; }
+        .logout-btn:hover {
+            background: rgba(239,68,68,0.12);
+            border-color: rgba(239,68,68,0.35);
+            color: #fca5a5;
+        }
+        .logout-btn svg { width: 13px; height: 13px; }
 
-        /* ── Main Area ── */
+        /* ════════════════════════════════
+           MAIN AREA
+        ════════════════════════════════ */
         .main-area {
             margin-left: var(--sidebar-w);
             flex: 1;
@@ -160,52 +244,69 @@
             min-width: 0;
         }
 
-        /* ── Topbar ── */
+        /* Topbar */
         .topbar {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(108,99,255,0.1);
             padding: 0 32px;
-            height: 56px;
+            height: 58px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             position: sticky;
             top: 0;
             z-index: 50;
-            box-shadow: var(--shadow);
+            box-shadow: 0 1px 24px rgba(108,99,255,0.07);
         }
         .topbar-left { display: flex; flex-direction: column; gap: 1px; }
-        .topbar-title { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
-        .topbar-date { font-size: 12px; color: var(--text3); }
-        .topbar-right { display: flex; align-items: center; gap: 12px; }
-        .topbar-greeting {
-            font-size: 13px;
-            color: var(--text2);
-            font-weight: 500;
+        .topbar-title {
+            font-size: 15.5px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.4px;
         }
-
-        /* ── Content ── */
-        .content {
-            padding: 28px 32px;
-            flex: 1;
+        .topbar-title span {
+            background: linear-gradient(90deg, var(--g1), var(--g3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
+        .topbar-date { font-size: 11.5px; color: var(--text3); font-weight: 400; }
 
-        /* ── Stats ── */
+        /* Content */
+        .content { padding: 28px 32px; flex: 1; }
+
+        /* ── Stats Grid ── */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 14px;
-            margin-bottom: 24px;
+            margin-bottom: 22px;
         }
         .stat-card {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 20px;
+            padding: 20px 20px 18px;
             box-shadow: var(--shadow);
-            transition: box-shadow 0.15s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
         }
-        .stat-card:hover { box-shadow: var(--shadow-md); }
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            border-radius: var(--radius) var(--radius) 0 0;
+            background: linear-gradient(90deg, var(--g4), var(--g1), var(--g2), var(--g3));
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .stat-card:hover::after { opacity: 1; }
         .stat-header {
             display: flex;
             justify-content: space-between;
@@ -213,22 +314,22 @@
             margin-bottom: 12px;
         }
         .stat-label {
-            font-size: 11.5px;
-            font-weight: 600;
+            font-size: 10.5px;
+            font-weight: 700;
             color: var(--text3);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
         }
         .stat-icon {
-            width: 32px; height: 32px;
-            border-radius: 7px;
+            width: 34px; height: 34px;
+            border-radius: 9px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 14px;
+            font-size: 15px;
         }
-        .si-green  { background: var(--green-light); }
-        .si-blue   { background: var(--accent-light); }
-        .si-amber  { background: var(--amber-light); }
-        .si-purple { background: var(--purple-light); }
+        .si-green  { background: linear-gradient(135deg, rgba(6,182,212,0.12), rgba(108,99,255,0.1)); }
+        .si-blue   { background: linear-gradient(135deg, rgba(108,99,255,0.12), rgba(168,85,247,0.1)); }
+        .si-amber  { background: linear-gradient(135deg, rgba(168,85,247,0.12), rgba(236,72,153,0.1)); }
+        .si-purple { background: linear-gradient(135deg, rgba(236,72,153,0.12), rgba(59,130,246,0.1)); }
 
         .stat-value {
             font-size: 26px;
@@ -237,27 +338,21 @@
             letter-spacing: -0.5px;
             font-family: 'JetBrains Mono', monospace;
             line-height: 1;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
-        .stat-desc { font-size: 12px; color: var(--text3); }
+        .stat-desc { font-size: 11.5px; color: var(--text3); font-weight: 400; }
 
-        /* ── Section title ── */
+        /* Section label */
         .section-label {
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.6px;
+            letter-spacing: 0.7px;
             color: var(--text3);
             margin-bottom: 12px;
         }
 
-        /* ── Charts ── */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            gap: 14px;
-            margin-bottom: 24px;
-        }
+        /* ── Cards ── */
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -266,29 +361,43 @@
             box-shadow: var(--shadow);
         }
         .card-title {
-            font-size: 13.5px;
+            font-size: 13px;
             font-weight: 700;
             color: var(--text);
-            margin-bottom: 16px;
+            margin-bottom: 18px;
             letter-spacing: -0.2px;
+        }
+
+        /* Charts grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 14px;
+            margin-bottom: 22px;
         }
         .chart-wrap { position: relative; height: 250px; }
 
-        /* ── Status summary ── */
-        .status-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
+        /* Status summary */
+        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .status-item {
             background: var(--surface2);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 14px 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        .status-item::before {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--g4), var(--g1), var(--g2), var(--g3));
+            opacity: 0.5;
         }
         .status-item-label {
-            font-size: 10.5px;
-            font-weight: 600;
+            font-size: 10px;
+            font-weight: 700;
             color: var(--text3);
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -301,25 +410,22 @@
             color: var(--text);
         }
 
-        /* ── Tables ── */
+        /* Tables */
         .tables-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 14px;
             margin-bottom: 24px;
         }
-        .tbl {
-            width: 100%;
-            border-collapse: collapse;
-        }
+        .tbl { width: 100%; border-collapse: collapse; }
         .tbl thead th {
             padding: 9px 12px;
             text-align: left;
-            font-size: 10.5px;
+            font-size: 10px;
             font-weight: 700;
             color: var(--text3);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
             background: var(--surface2);
             border-bottom: 1px solid var(--border);
         }
@@ -328,42 +434,55 @@
             font-size: 13px;
             color: var(--text);
             border-bottom: 1px solid var(--border);
+            font-weight: 400;
         }
         .tbl tbody tr:last-child td { border-bottom: none; }
         .tbl tbody tr:hover td { background: var(--surface2); }
 
-        /* ── Badges ── */
+        /* Badges — gradient palette */
         .badge {
             display: inline-flex;
             align-items: center;
-            padding: 3px 9px;
+            padding: 3px 10px;
             border-radius: 20px;
             font-size: 11px;
             font-weight: 600;
         }
-        .badge.completed  { background: var(--green-light);   color: var(--green); }
-        .badge.pending    { background: var(--amber-light);   color: var(--amber); }
-        .badge.confirmed  { background: var(--accent-light);  color: var(--accent); }
-        .badge.cancelled  { background: var(--red-light);     color: var(--red); }
-
-        /* ── Staff summary ── */
-        .staff-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+        .badge.completed {
+            background: linear-gradient(90deg, rgba(108,99,255,0.12), rgba(168,85,247,0.12));
+            color: var(--g1);
+            border: 1px solid rgba(108,99,255,0.2);
         }
+        .badge.pending {
+            background: linear-gradient(90deg, rgba(168,85,247,0.12), rgba(236,72,153,0.12));
+            color: var(--g2);
+            border: 1px solid rgba(168,85,247,0.2);
+        }
+        .badge.confirmed {
+            background: linear-gradient(90deg, rgba(59,130,246,0.12), rgba(108,99,255,0.12));
+            color: var(--g4);
+            border: 1px solid rgba(59,130,246,0.2);
+        }
+        .badge.cancelled {
+            background: rgba(239,68,68,0.08);
+            color: #ef4444;
+            border: 1px solid rgba(239,68,68,0.18);
+        }
+
+        /* Staff */
+        .staff-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .staff-item {
             background: var(--surface2);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 14px;
         }
         .staff-item-label {
-            font-size: 10.5px;
-            font-weight: 600;
+            font-size: 10px;
+            font-weight: 700;
             color: var(--text3);
             text-transform: uppercase;
-            letter-spacing: 0.4px;
+            letter-spacing: 0.5px;
             margin-bottom: 5px;
         }
         .staff-item-val {
@@ -373,13 +492,13 @@
             color: var(--text);
         }
 
-        /* ── Empty state ── */
+        /* Empty */
         .empty { text-align: center; padding: 28px 16px; color: var(--text3); font-size: 13px; }
         .empty-icon { font-size: 28px; margin-bottom: 8px; }
 
-        /* ── Responsive ── */
+        /* Responsive */
         @media (max-width: 1100px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-grid { grid-template-columns: repeat(2,1fr); }
             .charts-grid { grid-template-columns: 1fr; }
             .tables-grid { grid-template-columns: 1fr; }
         }
@@ -393,12 +512,70 @@
 </head>
 <body>
 
-<!-- Sidebar -->
+<!-- ═══ SIDEBAR ═══ -->
 <aside class="sidebar">
+    <!-- Blobs -->
+    <div class="sidebar-blob sb-b1"></div>
+    <div class="sidebar-blob sb-b2"></div>
+    <div class="sidebar-blob sb-b3"></div>
+    <div class="sidebar-blob sb-b4"></div>
+
+    <!-- Wave lines -->
+    <svg class="sidebar-waves" viewBox="0 0 230 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="sw1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#6C63FF" stop-opacity="0.6"/>
+                <stop offset="100%" stop-color="#EC4899" stop-opacity="0.4"/>
+            </linearGradient>
+            <linearGradient id="sw2" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#A855F7" stop-opacity="0.5"/>
+                <stop offset="100%" stop-color="#06B6D4" stop-opacity="0.3"/>
+            </linearGradient>
+        </defs>
+        <path d="M-20 150 C 60 80, 150 220, 260 150" stroke="url(#sw1)" stroke-width="2" fill="none">
+            <animate attributeName="d" dur="8s" repeatCount="indefinite"
+                values="M-20 150 C 60 80, 150 220, 260 150;
+                        M-20 170 C 50 100, 160 200, 260 130;
+                        M-20 150 C 60 80, 150 220, 260 150"/>
+        </path>
+        <path d="M-20 320 C 80 250, 160 400, 260 320" stroke="url(#sw1)" stroke-width="1.5" fill="none">
+            <animate attributeName="d" dur="11s" repeatCount="indefinite"
+                values="M-20 320 C 80 250, 160 400, 260 320;
+                        M-20 300 C 70 260, 150 380, 260 300;
+                        M-20 320 C 80 250, 160 400, 260 320"/>
+        </path>
+        <path d="M-20 500 C 70 430, 180 570, 260 500" stroke="url(#sw2)" stroke-width="1.8" fill="none">
+            <animate attributeName="d" dur="9s" repeatCount="indefinite"
+                values="M-20 500 C 70 430, 180 570, 260 500;
+                        M-20 480 C 80 450, 170 550, 260 480;
+                        M-20 500 C 70 430, 180 570, 260 500"/>
+        </path>
+        <path d="M-20 680 C 100 610, 150 750, 280 680" stroke="url(#sw2)" stroke-width="1.2" fill="none">
+            <animate attributeName="d" dur="13s" repeatCount="indefinite"
+                values="M-20 680 C 100 610, 150 750, 280 680;
+                        M-20 660 C 90 630, 160 730, 280 660;
+                        M-20 680 C 100 610, 150 750, 280 680"/>
+        </path>
+        <path d="M-20 850 C 80 800, 180 880, 280 840" stroke="#EC4899" stroke-width="1" fill="none" opacity="0.35">
+            <animate attributeName="d" dur="10s" repeatCount="indefinite"
+                values="M-20 850 C 80 800, 180 880, 280 840;
+                        M-20 830 C 90 810, 170 870, 280 820;
+                        M-20 850 C 80 800, 180 880, 280 840"/>
+        </path>
+    </svg>
+
+    <div class="sidebar-grain"></div>
+
+    <!-- Brand -->
     <div class="sidebar-brand">
         <div class="brand-mark">
             <div class="brand-icon">
-                <svg viewBox="0 0 24 24"><path d="M9 2H7a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V4a2 2 0 00-2-2h-2M9 2a1 1 0 001 1h4a1 1 0 001-1M9 2a1 1 0 000 1h4a1 1 0 000-1M12 11h4M12 15h4M8 11h.01M8 15h.01"/></svg>
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                    <rect x="9" y="3" width="6" height="4" rx="1"/>
+                    <line x1="9" y1="12" x2="15" y2="12"/>
+                    <line x1="9" y1="16" x2="13" y2="16"/>
+                </svg>
             </div>
             <div>
                 <div class="brand-name">Ordering System</div>
@@ -407,6 +584,7 @@
         </div>
     </div>
 
+    <!-- Nav -->
     <nav class="sidebar-nav">
         <div class="nav-section-label">Main</div>
         <a href="/dashboard" class="nav-item active">
@@ -418,48 +596,49 @@
             Orders
         </a>
 
-        <div class="nav-section-label" sec:authorize="hasRole('ADMIN')">Admin</div>
-        <a href="/items" class="nav-item" sec:authorize="hasRole('ADMIN')">
+        <div class="nav-section-label">Admin</div>
+        <a href="/items" class="nav-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
             Items
         </a>
-        <a href="/users" class="nav-item" sec:authorize="hasRole('ADMIN')">
+        <a href="/users" class="nav-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
             Users
         </a>
-        <a href="/labor" class="nav-item" sec:authorize="hasRole('ADMIN')">
+        <a href="/labor" class="nav-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             Labor
         </a>
-        <a href="/reports" class="nav-item" sec:authorize="hasRole('ADMIN')">
+        <a href="/reports" class="nav-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
             Reports
         </a>
     </nav>
 
+    <!-- Footer -->
     <div class="sidebar-footer">
         <div class="user-info">
-            <div class="user-avatar" th:text="${username != null ? username.substring(0,1).toUpperCase() : 'U'}">U</div>
+            <div class="user-avatar">C</div>
             <div>
-                <div class="user-name" th:text="${username}">User</div>
+                <div class="user-name">christian</div>
                 <div class="user-role">Logged in</div>
             </div>
         </div>
-        <form th:action="@{/logout}" method="post" class="logout-form">
+        <form action="/logout" method="post" class="logout-form">
             <button type="submit" class="logout-btn">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
                 Sign Out
             </button>
         </form>
     </div>
 </aside>
 
-<!-- Main -->
+<!-- ═══ MAIN ═══ -->
 <div class="main-area">
     <header class="topbar">
         <div class="topbar-left">
-            <div class="topbar-title" th:text="'Welcome back, ' + ${username}">Welcome</div>
-            <div class="topbar-date" th:text="${#dates.format(currentDate, 'EEEE, MMMM d, yyyy')}">Today</div>
+            <div class="topbar-title">Welcome back, <span>christian</span></div>
+            <div class="topbar-date">Thursday, April 30, 2026</div>
         </div>
     </header>
 
@@ -472,7 +651,7 @@
                     <div class="stat-label">Total Sales</div>
                     <div class="stat-icon si-green">💰</div>
                 </div>
-                <div class="stat-value" th:text="'₱' + ${#numbers.formatInteger(totalSales ?: 0, 0, 'COMMA')}">₱0</div>
+                <div class="stat-value">₱330</div>
                 <div class="stat-desc">Last 30 days</div>
             </div>
             <div class="stat-card">
@@ -480,32 +659,24 @@
                     <div class="stat-label">Total Orders</div>
                     <div class="stat-icon si-blue">📋</div>
                 </div>
-                <div class="stat-value" th:text="${totalOrders ?: 0}">0</div>
-                <div class="stat-desc" th:text="${pendingCount} + ' pending'">0 pending</div>
+                <div class="stat-value">3</div>
+                <div class="stat-desc">0 pending</div>
             </div>
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-label">Inventory Items</div>
                     <div class="stat-icon si-amber">📦</div>
                 </div>
-                <div class="stat-value" th:text="${totalItems ?: 0}">0</div>
+                <div class="stat-value">1</div>
                 <div class="stat-desc">In stock</div>
             </div>
-            <div class="stat-card" sec:authorize="hasRole('ADMIN')">
+            <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-label">Active Staff</div>
                     <div class="stat-icon si-purple">👷</div>
                 </div>
-                <div class="stat-value" th:text="${activeLabor ?: 0}">0</div>
-                <div class="stat-desc" th:text="'₱' + ${#numbers.formatInteger(totalPayroll ?: 0, 0, 'COMMA')} + ' payroll/mo'">₱0/mo</div>
-            </div>
-            <div class="stat-card" sec:authorize="!hasRole('ADMIN')">
-                <div class="stat-header">
-                    <div class="stat-label">Total Users</div>
-                    <div class="stat-icon si-purple">👥</div>
-                </div>
-                <div class="stat-value" th:text="${totalStaff ?: 0}">0</div>
-                <div class="stat-desc">All users</div>
+                <div class="stat-value">1</div>
+                <div class="stat-desc">₱500 payroll/mo</div>
             </div>
         </div>
 
@@ -522,19 +693,19 @@
                 <div class="status-grid">
                     <div class="status-item">
                         <div class="status-item-label">Completed</div>
-                        <div class="status-item-val" th:text="${completedCount ?: 0}">0</div>
+                        <div class="status-item-val">3</div>
                     </div>
                     <div class="status-item">
                         <div class="status-item-label">Pending</div>
-                        <div class="status-item-val" th:text="${pendingCount ?: 0}">0</div>
+                        <div class="status-item-val">0</div>
                     </div>
                     <div class="status-item">
                         <div class="status-item-label">Confirmed</div>
-                        <div class="status-item-val" th:text="${confirmedCount ?: 0}">0</div>
+                        <div class="status-item-val">0</div>
                     </div>
                     <div class="status-item">
                         <div class="status-item-label">Cancelled</div>
-                        <div class="status-item-val" th:text="${cancelledCount ?: 0}">0</div>
+                        <div class="status-item-val">0</div>
                     </div>
                 </div>
             </div>
@@ -545,60 +716,62 @@
             <!-- Top Selling Items -->
             <div class="card">
                 <div class="card-title">Top Selling Items</div>
-                <table class="tbl" th:if="${topSellingItems != null and !topSellingItems.isEmpty()}">
+                <table class="tbl">
                     <thead>
                         <tr><th>#</th><th>Item</th><th>Qty Sold</th></tr>
                     </thead>
                     <tbody>
-                        <tr th:each="item, s : ${topSellingItems}">
-                            <td style="color:var(--text3);width:32px" th:text="${s.count}">1</td>
-                            <td th:text="${item['itemOrdered']}">Item</td>
-                            <td style="font-family:'JetBrains Mono',monospace;font-weight:600" th:text="${item['quantity']}">0</td>
+                        <tr>
+                            <td style="color:var(--text3);width:32px">1</td>
+                            <td>burger</td>
+                            <td style="font-family:'JetBrains Mono',monospace;font-weight:600">11</td>
                         </tr>
                     </tbody>
                 </table>
-                <div class="empty" th:if="${topSellingItems == null or topSellingItems.isEmpty()}">
-                    <div class="empty-icon">📦</div>No sales data yet
-                </div>
             </div>
 
             <!-- Recent Orders -->
             <div class="card">
                 <div class="card-title">Recent Orders</div>
-                <table class="tbl" th:if="${recentOrders != null and !recentOrders.isEmpty()}">
+                <table class="tbl">
                     <thead>
                         <tr><th>Customer</th><th>Item</th><th>Status</th></tr>
                     </thead>
                     <tbody>
-                        <tr th:each="order : ${recentOrders}">
-                            <td th:text="${order.customerName}">Customer</td>
-                            <td th:text="${order.itemOrdered}">Item</td>
-                            <td>
-                                <span class="badge" th:classappend="${order.status.toLowerCase()}" th:text="${order.status}">Status</span>
-                            </td>
+                        <tr>
+                            <td>n</td>
+                            <td>burger</td>
+                            <td><span class="badge completed">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>ee</td>
+                            <td>burger</td>
+                            <td><span class="badge completed">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>cj</td>
+                            <td>burger</td>
+                            <td><span class="badge completed">Completed</span></td>
                         </tr>
                     </tbody>
                 </table>
-                <div class="empty" th:if="${recentOrders == null or recentOrders.isEmpty()}">
-                    <div class="empty-icon">📋</div>No orders yet
-                </div>
             </div>
 
             <!-- Staff Overview -->
-            <div class="card" sec:authorize="hasRole('ADMIN')">
+            <div class="card">
                 <div class="card-title">Staff Overview</div>
                 <div class="staff-grid">
                     <div class="staff-item">
                         <div class="staff-item-label">Active</div>
-                        <div class="staff-item-val" th:text="${activeLabor ?: 0}">0</div>
+                        <div class="staff-item-val">1</div>
                     </div>
                     <div class="staff-item">
                         <div class="staff-item-label">Inactive</div>
-                        <div class="staff-item-val" th:text="${inactiveLabor ?: 0}">0</div>
+                        <div class="staff-item-val">0</div>
                     </div>
                     <div class="staff-item">
                         <div class="staff-item-label">Monthly Payroll</div>
-                        <div class="staff-item-val" style="font-size:15px" th:text="'₱' + ${#numbers.formatInteger(totalPayroll ?: 0, 0, 'COMMA')}">₱0</div>
+                        <div class="staff-item-val" style="font-size:15px">₱500</div>
                     </div>
                 </div>
             </div>
@@ -607,37 +780,61 @@
     </main>
 </div>
 
-<script th:inline="javascript">
-    const completedCount = /*[[${completedCount}]]*/ 0;
-    const pendingCount   = /*[[${pendingCount}]]*/ 0;
-    const cancelledCount = /*[[${cancelledCount}]]*/ 0;
-    const confirmedCount = /*[[${confirmedCount}]]*/ 0;
+<script>
+    const completedCount = 3;
+    const pendingCount   = 0;
+    const cancelledCount = 0;
+    const confirmedCount = 0;
     const total = completedCount + pendingCount + cancelledCount + confirmedCount;
 
-    new Chart(document.getElementById('statusChart').getContext('2d'), {
+    /* Build gradient segments matching the Submit button palette */
+    const ctx = document.getElementById('statusChart').getContext('2d');
+
+    /* Gradient for "Completed" arc — Blue → Indigo */
+    const gCompleted = ctx.createLinearGradient(0, 0, 200, 200);
+    gCompleted.addColorStop(0,   '#3B82F6');
+    gCompleted.addColorStop(1,   '#6C63FF');
+
+    /* Gradient for "Pending" arc — Purple → Magenta */
+    const gPending = ctx.createLinearGradient(200, 0, 0, 200);
+    gPending.addColorStop(0,   '#A855F7');
+    gPending.addColorStop(1,   '#EC4899');
+
+    /* Gradient for "Cancelled" arc — Magenta → Red-ish */
+    const gCancelled = ctx.createLinearGradient(0, 200, 200, 0);
+    gCancelled.addColorStop(0, '#EC4899');
+    gCancelled.addColorStop(1, '#f43f5e');
+
+    /* Gradient for "Confirmed" arc — Cyan → Blue */
+    const gConfirmed = ctx.createLinearGradient(200, 200, 0, 0);
+    gConfirmed.addColorStop(0, '#06B6D4');
+    gConfirmed.addColorStop(1, '#3B82F6');
+
+    new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: ['Completed', 'Pending', 'Cancelled', 'Confirmed'],
             datasets: [{
                 data: [completedCount, pendingCount, cancelledCount, confirmedCount],
-                backgroundColor: ['#059669','#d97706','#dc2626','#2563eb'],
+                backgroundColor: [gCompleted, gPending, gCancelled, gConfirmed],
                 borderColor: '#ffffff',
                 borderWidth: 3,
-                hoverOffset: 4
+                hoverOffset: 6
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '68%',
+            cutout: '70%',
             plugins: {
                 legend: {
                     position: 'bottom',
                     labels: {
-                        usePointStyle: true, pointStyle: 'circle',
+                        usePointStyle: true,
+                        pointStyle: 'circle',
                         padding: 20,
-                        font: { family: 'Plus Jakarta Sans', size: 12 },
-                        color: '#4b5563'
+                        font: { family: 'Poppins', size: 12 },
+                        color: '#4a4a6a'
                     }
                 },
                 tooltip: {
