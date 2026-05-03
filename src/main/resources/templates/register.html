@@ -49,6 +49,53 @@
         .input-line{position:absolute;bottom:0;left:0;width:0;height:2px;background:linear-gradient(90deg,var(--g4),var(--g1),var(--g2),var(--g3));border-radius:2px;transition:width .35s cubic-bezier(.4,0,.2,1)}
         .form-input:focus~.input-line,.form-select:focus~.input-line{width:100%}
 
+        /* ── Password Strength ── */
+        .strength-wrap {
+            margin-top: 10px;
+        }
+        .strength-bars {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 6px;
+        }
+        .strength-bar {
+            flex: 1;
+            height: 4px;
+            border-radius: 4px;
+            background: #e8e8f4;
+            transition: background 0.3s ease;
+        }
+        .strength-bar.active-weak     { background: #ef4444; }
+        .strength-bar.active-fair     { background: #f97316; }
+        .strength-bar.active-good     { background: #eab308; }
+        .strength-bar.active-strong   { background: #22c55e; }
+        .strength-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text3);
+            letter-spacing: 0.3px;
+            transition: color 0.3s;
+            min-height: 16px;
+        }
+        .strength-label.weak   { color: #ef4444; }
+        .strength-label.fair   { color: #f97316; }
+        .strength-label.good   { color: #eab308; }
+        .strength-label.strong { color: #22c55e; }
+
+        /* ── Password Match Hint ── */
+        .match-hint {
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 8px;
+            min-height: 16px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.2s;
+        }
+        .match-hint.match   { color: #22c55e; }
+        .match-hint.no-match { color: #ef4444; }
+
         /* Alerts */
         .error-msg{display:flex;align-items:center;gap:8px;background:#fff1f2;border:1px solid #fecdd3;color:var(--red);padding:11px 14px;border-radius:10px;font-size:12.5px;font-weight:500;margin-bottom:24px}
         .success-msg{display:flex;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;color:var(--green);padding:11px 14px;border-radius:10px;font-size:12.5px;font-weight:500;margin-bottom:24px}
@@ -115,20 +162,36 @@
                         <span class="input-line"></span>
                     </div>
                 </div>
+
+                <!-- Password with strength meter -->
                 <div class="form-group">
                     <label class="form-label" for="password">Password</label>
                     <div class="input-wrap">
-                        <input type="password" name="password" id="password" class="form-input" placeholder="Minimum 6 characters" minlength="6" required autocomplete="new-password">
+                        <input type="password" name="password" id="password" class="form-input" placeholder="Minimum 6 characters" minlength="6" required autocomplete="new-password" oninput="checkStrength(this.value)">
                         <span class="input-line"></span>
                     </div>
+                    <!-- Strength bars -->
+                    <div class="strength-wrap">
+                        <div class="strength-bars">
+                            <div class="strength-bar" id="bar1"></div>
+                            <div class="strength-bar" id="bar2"></div>
+                            <div class="strength-bar" id="bar3"></div>
+                            <div class="strength-bar" id="bar4"></div>
+                        </div>
+                        <div class="strength-label" id="strengthLabel"></div>
+                    </div>
                 </div>
+
+                <!-- Confirm password with match hint -->
                 <div class="form-group">
                     <label class="form-label" for="confirmPassword">Confirm Password</label>
                     <div class="input-wrap">
-                        <input type="password" name="confirmPassword" id="confirmPassword" class="form-input" placeholder="Re-enter password" minlength="6" required autocomplete="new-password">
+                        <input type="password" name="confirmPassword" id="confirmPassword" class="form-input" placeholder="Re-enter password" minlength="6" required autocomplete="new-password" oninput="checkMatch()">
                         <span class="input-line"></span>
                     </div>
+                    <div class="match-hint" id="matchHint"></div>
                 </div>
+
                 <div class="form-group">
                     <label class="form-label" for="role">Role</label>
                     <div class="input-wrap">
@@ -149,9 +212,63 @@
     </div>
 
     <script>
+        /* ── Clear on load ── */
         function clearFields(){document.querySelectorAll('input[type="text"],input[type="password"]').forEach(i=>i.value='')}
         document.addEventListener('DOMContentLoaded',()=>{clearFields();setTimeout(clearFields,100);setTimeout(clearFields,500)});
         window.addEventListener('load',()=>{clearFields();setTimeout(clearFields,100)});
+
+        /* ── Password Strength ── */
+        function checkStrength(val) {
+            const bars  = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3'), document.getElementById('bar4')];
+            const label = document.getElementById('strengthLabel');
+
+            // Reset
+            bars.forEach(b => b.className = 'strength-bar');
+            label.className = 'strength-label';
+
+            if (!val) { label.textContent = ''; return; }
+
+            let score = 0;
+            if (val.length >= 6)  score++;
+            if (val.length >= 10) score++;
+            if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            // Map score → level (1–4)
+            let level = score <= 1 ? 1 : score === 2 ? 2 : score <= 3 ? 3 : 4;
+
+            const config = {
+                1: { cls: 'active-weak',   labelCls: 'weak',   text: '🔴 Too weak' },
+                2: { cls: 'active-fair',   labelCls: 'fair',   text: '🟠 Fair' },
+                3: { cls: 'active-good',   labelCls: 'good',   text: '🟡 Good' },
+                4: { cls: 'active-strong', labelCls: 'strong', text: '🟢 Strong' },
+            };
+
+            for (let i = 0; i < level; i++) bars[i].classList.add(config[level].cls);
+            label.classList.add(config[level].labelCls);
+            label.textContent = config[level].text;
+
+            // Also re-check match if confirm is filled
+            checkMatch();
+        }
+
+        /* ── Password Match ── */
+        function checkMatch() {
+            const pw   = document.getElementById('password').value;
+            const conf = document.getElementById('confirmPassword').value;
+            const hint = document.getElementById('matchHint');
+
+            if (!conf) { hint.textContent = ''; hint.className = 'match-hint'; return; }
+
+            if (pw === conf) {
+                hint.className = 'match-hint match';
+                hint.innerHTML = '✓ Passwords match';
+            } else {
+                hint.className = 'match-hint no-match';
+                hint.innerHTML = '✕ Passwords do not match';
+            }
+        }
     </script>
 </body>
 </html>
